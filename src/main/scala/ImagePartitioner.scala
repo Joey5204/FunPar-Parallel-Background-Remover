@@ -3,7 +3,7 @@ import java.awt.image.BufferedImage
 object ImagePartitioner {
     case class Region(x: Int, y: Int, width: Int, height: Int)
 
-    val MIN_REGION_SIZE = 20 // min width/height of a region
+    val MIN_REGION_SIZE = 50 // min width/height of a region
 
     def partitionImage(image: BufferedImage, edgeDensityMap: Array[Array[Double]], threshold: Double): List[Region] = {
         val initialRegion = Region(0, 0, image.getWidth, image.getHeight)

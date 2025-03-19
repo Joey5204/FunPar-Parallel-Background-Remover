@@ -6,7 +6,7 @@
   val edgeDensityMap = EdgeDensity.calculateEdgeDensity(image)
   println("Edge density map calculated.")
 
-  val threshold = 0.2
+  val threshold = 0.1
   val regions = ImagePartitioner.partitionImage(image, edgeDensityMap, threshold)
   println(s"Image partitioned into ${regions.length} regions.")
 
