@@ -2,7 +2,10 @@
   val imagePath = "src/main/resources/images.png"
   val image = ImageLoader.loadImage(imagePath)
   println("ImageLoader done!")
-  
+
+  val bgColor = BackgroundRemover.detectBackgroundColor(image)
+  println(s"Detected background color: $bgColor")
+
   val edgeDensityMap = EdgeDensity.calculateEdgeDensity(image)
   println("Edge density map calculated.")
 
@@ -12,9 +15,15 @@
 
   for ((region, index) <- regions.zipWithIndex) {
     val subImage = image.getSubimage(region.x, region.y, region.width, region.height)
-    val outputPath = s"src/main/resources/output/region_$index.jpg"
-    javax.imageio.ImageIO.write(subImage, "jpg", new java.io.File(outputPath))
+    
+    // Create a binary mask for the region
+    val mask = BackgroundRemover.createMask(subImage, bgColor, threshold = 50)
+    val processedRegion = BackgroundRemover.applyMask(subImage, mask)
+
+    val outputPath = s"src/main/resources/output/region_$index.png"
+    javax.imageio.ImageIO.write(processedRegion, "png", new java.io.File(outputPath))
     println(s"Saved region $index at: $outputPath")
   }
-  println("Partitioning complete")
+  
+  println("Partitioning and background removal complete!")
 }
