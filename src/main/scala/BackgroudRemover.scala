@@ -52,7 +52,7 @@ object BackgroundRemover {
         for (x <- (0).until(image.getWidth); y <- (0).until(image.getHeight)) {
             if (mask(x)(y) == 1) {
                 output.setRGB(x, y, image.getRGB(x, y)) // foreground pixel
-            } 
+            }
             else {
                 output.setRGB(x, y, 0) // transparent background
             }

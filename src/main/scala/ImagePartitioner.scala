@@ -3,32 +3,33 @@ import java.awt.image.BufferedImage
 object ImagePartitioner {
     case class Region(x: Int, y: Int, width: Int, height: Int)
 
-    val MIN_REGION_SIZE = 50 // min width/height of a region
+    val MIN_REGION_SIZE = 500
+    val MAX_DEPTH = 5
 
     def partitionImage(image: BufferedImage, edgeDensityMap: Array[Array[Double]], threshold: Double): List[Region] = {
         val initialRegion = Region(0, 0, image.getWidth, image.getHeight)
-        partitionRegion(initialRegion, edgeDensityMap, threshold)
+        partitionRegion(initialRegion, edgeDensityMap, threshold, depth = 0)
     }
 
-    private def partitionRegion(region: Region, edgeDensityMap: Array[Array[Double]], threshold: Double): List[Region] = {
-        val avgDensity = computeRegionEdgeDensity(region, edgeDensityMap)
-
-        if (avgDensity < threshold || region.width <= MIN_REGION_SIZE || region.height <= MIN_REGION_SIZE) {
+    private def partitionRegion(region: Region, edgeDensityMap: Array[Array[Double]], threshold: Double, depth: Int): List[Region] = {
+        if (depth >= MAX_DEPTH || region.width <= MIN_REGION_SIZE || region.height <= MIN_REGION_SIZE) {
             List(region)
-        } 
-        else {
-        // split into 4 
-        val halfWidth = region.width / 2
-        val halfHeight = region.height / 2
+        } else {
+            val avgDensity = computeRegionEdgeDensity(region, edgeDensityMap)
+            if (avgDensity < threshold) {
+                List(region)
+            } else {
+                val halfWidth = region.width / 2
+                val halfHeight = region.height / 2
 
-        val subregions = List(
-            Region(region.x, region.y, halfWidth, halfHeight), // topleft
-            Region(region.x + halfWidth, region.y, halfWidth, halfHeight), // topright
-            Region(region.x, region.y + halfHeight, halfWidth, halfHeight), // bottomleft
-            Region(region.x + halfWidth, region.y + halfHeight, halfWidth, halfHeight) // bottomright
-        )
-        // recursively partition each subregion
-        subregions.flatMap(partitionRegion(_, edgeDensityMap, threshold))
+                val subregions = List(
+                    Region(region.x, region.y, halfWidth, halfHeight),
+                    Region(region.x + halfWidth, region.y, halfWidth, halfHeight),
+                    Region(region.x, region.y + halfHeight, halfWidth, halfHeight),
+                    Region(region.x + halfWidth, region.y + halfHeight, halfWidth, halfHeight)
+                )
+                subregions.flatMap(r => partitionRegion(r, edgeDensityMap, threshold, depth + 1))
+            }
         }
     }
 
